@@ -15,8 +15,6 @@ GOOGLE_CHROME_PATH = '/app/.apt/usr/bin/google_chrome'
 CHROMEDRIVER_PATH = '/app/.chromedriver/bin/chromedriver'
 
 options = Options()
-options.headless = False
-options = Options()
 options.binary_location = GOOGLE_CHROME_PATH
 options.add_argument('--disable-gpu')
 options.add_argument('--no-sandbox')
