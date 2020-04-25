@@ -9,6 +9,11 @@ import logging
 import random
 import threading
 
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+
+cap = DesiredCapabilities().FIREFOX
+cap["marionette"] = False
+
 logger = logging.getLogger('Skribbl Bot Logger')
 
 GOOGLE_CHROME_PATH = '/app/.apt/usr/bin/google-chrome'
@@ -98,7 +103,7 @@ class SkribblBot:
             self.game_link_lock.acquire()
 
             logger.warning('Opening Chrome Headless browser')
-            self.driver = webdriver.Firefox(executable_path='/app/vendor/geckodriver/geckodriver') # webdriver.PhantomJS() # webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, chrome_options=options)
+            self.driver = webdriver.Firefox(executable_path='/app/vendor/geckodriver/geckodriver', capabilities=cap) # webdriver.PhantomJS() # webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, chrome_options=options)
             logger.warning('Chrome Headless browser opened successfully')
 
             self.driver.get(skribbl_url)
