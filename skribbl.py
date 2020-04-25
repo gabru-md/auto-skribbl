@@ -18,6 +18,7 @@ options = Options()
 options.binary_location = GOOGLE_CHROME_PATH
 options.add_argument('--disable-gpu')
 options.add_argument('--no-sandbox')
+options.add_argument('--headless')
 
 
 skribbl_url = 'https://skribbl.io'
