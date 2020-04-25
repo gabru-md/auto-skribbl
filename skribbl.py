@@ -16,8 +16,6 @@ CHROMEDRIVER_PATH = '/app/.chromedriver/bin/chromedriver'
 
 options = Options()
 options.binary_location = GOOGLE_CHROME_PATH
-options.add_argument('--disable-gpu')
-options.add_argument('--no-sandbox')
 
 
 skribbl_url = 'https://skribbl.io'
