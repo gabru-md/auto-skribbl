@@ -2,7 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException, JavascriptException, NoSuchWindowException, ElementNotInteractableException
+from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException, JavascriptException, NoSuchWindowException, ElementNotInteractableException, WebDriverException
 from selenium.webdriver.firefox.options import Options
 from time import sleep
 import logging
@@ -66,7 +66,7 @@ class SkribblBot:
             self.driver.execute_script(accept_cookies_remove_script)
             logger.warning('Removed Accept Cookies box')
             self.cookies_accepted = True
-        except JavascriptException:
+        except (JavascriptException, WebDriverException) as e:
             logger.warning('Accept Cookies did not pop up')
 
     def check_id_exists(self, id):
@@ -98,13 +98,14 @@ class SkribblBot:
             self.game_link_lock.acquire()
 
             logger.warning('Opening Chrome Headless browser')
-            self.driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, chrome_options=options)
+            self.driver = webdriver.Firefox() # webdriver.PhantomJS() # webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, chrome_options=options)
             logger.warning('Chrome Headless browser opened successfully')
 
             self.driver.get(skribbl_url)
 
             self.accept_cookies()
             logger.warning('Website %s opened successfully', skribbl_url)
+
             bot_name_field = self.driver.find_element_by_id(bot['name_field_id'])
             bot_name_field.send_keys(self.name)
 
@@ -176,13 +177,13 @@ class SkribblBot:
             logger.warning('Bot removed from the private room')
             logger.warning('Game has started')
 
-        except (ElementNotInteractableException, ElementClickInterceptedException, NoSuchElementException) as e:
+        except Exception as e:
             logger.warning('Accept Cookies occured abruptly or something else. Restarting the process')
             logger.warning(e)
-            # try:
-            #     self.game_link_lock.release()
-            # except Exception:
-            #     logger.warning('Cannot release lock. Maybe never acquired')
+            try:
+                self.game_link_lock.release()
+            except Exception:
+                logger.warning('Cannot release lock. Maybe never acquired')
             self.driver.close()
             self._start_game()
 
