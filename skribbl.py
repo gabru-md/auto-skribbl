@@ -1,0 +1,187 @@
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait, Select
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException, ElementClickInterceptedException, JavascriptException, NoSuchWindowException
+from selenium.webdriver.firefox.options import Options
+from time import sleep
+import logging
+import random
+import threading
+
+
+logger_format = '%(asctime)-15s, %(bot_name)-8s: %(message)s'
+logging.basicConfig(format=logger_format)
+logger = logging.getLogger('Skribbl Bot Logger')
+
+options = Options()
+options.headless = False
+
+skribbl_url = 'https://skribbl.io'
+
+accept_cookies_remove_script = 'document.getElementById("aip_gdpr_banner").innerHTML = ""; document.getElementById("aip_gdpr_banner").remove(); console.log("Accept Cookies Removed");'
+
+bot = {
+        'name_field_id': 'inputName',
+        'custom_avatar_random_id': 'buttonAvatarCustomizerRandomize',
+        'create_private_room_id':  'buttonLoginCreatePrivate',
+        'accept_cookies_id': 'aip_gdpr_continue',
+        'accept_cookies_xpath': '//*[@id="aip_gdpr_continue"]',
+        'invite_id': 'invite',
+        'lobby_rounds_id': 'lobbySetRounds',
+        'lobby_draw_time_id': 'lobbySetDrawTime',
+        'lobby_custom_words_id': 'lobbySetCustomWords',
+        'lobby_custom_words_chk_box_id': 'lobbyCustomWordsExclusive',
+        'lobby_start_game_id': 'buttonLobbyPlay',
+        'lobby_players_container_id': 'containerLobbyPlayers',
+        'lobby_player_class': 'lobbyPlayer',
+    }
+
+def get_bot_name():
+    return 'ASB ' + str(int(random.random()*1000))
+
+
+class SkribblBot:
+
+    def __init__(self, rounds, draw_time, required_players, custom_words_list):
+        self.name = get_bot_name()
+        self.extras = {'bot_name': self.name}
+        self.driver = None
+        self.rounds = str(rounds)
+        self.draw_time = str(draw_time)
+        self.required_players = required_players
+        self.custom_words_list = custom_words_list
+        self.cookies_accepted = False
+        self.game_link = None
+        self.game_link_lock = threading.Lock()
+        self.get_game_link = self._get_game_link
+
+    def accept_cookies(self):
+        if self.cookies_accepted:
+            return
+        try:
+            self.driver.execute_script(accept_cookies_remove_script)
+            logger.warning('Removed Accept Cookies box', extra=self.extras)
+            self.cookies_accepted = True
+        except JavascriptException:
+            logger.warning('Accept Cookies did not pop up', extra=self.extras)
+
+    def check_id_exists(self, id):
+        try:
+            self.driver.find_element_by_id(id)
+        except NoSuchElementException:
+            return False
+        return True
+    
+    def _get_game_link(self):
+        logger.warning('Acquiring game_link_lock for _get_game_link', extra=self.extras)
+        self.game_link_lock.acquire()
+        game_link = self.game_link
+        self.game_link_lock.release()
+        logger.warning('Releasing game_link_lock for _get_game_link', extra=self.extras)
+
+        return game_link
+
+    def start_game(self):
+        start_game_thread = threading.Thread(target=self._start_game)
+        start_game_thread.start()
+
+
+    def _start_game(self):
+        try:
+            logger.warning('Acquiring game_link_lock for _start_game', extra=self.extras)
+            self.game_link_lock.acquire()
+
+            logger.warning('Opening Firefox browser', extra=self.extras)
+            self.driver = webdriver.Firefox(options=options)
+            logger.warning('Firefox browser opened successfully', extra=self.extras)
+
+            self.driver.get(skribbl_url)
+
+            self.accept_cookies()
+            logger.warning('Website %s opened successfully', skribbl_url, extra=self.extras)
+            bot_name_field = self.driver.find_element_by_id(bot['name_field_id'])
+            bot_name_field.send_keys(self.name)
+
+            self.accept_cookies()
+            bot_avatar_randomize = self.driver.find_element_by_id(bot['custom_avatar_random_id'])
+            bot_avatar_randomize.click()
+            logger.warning('Randomized bot avatar successfully', extra=self.extras)
+
+            self.accept_cookies()
+            bot_private_room = self.driver.find_element_by_id(bot['create_private_room_id'])
+            bot_private_room.click()
+            logger.warning('Private room created successfully', extra=self.extras)
+
+            if not self.check_id_exists(bot['invite_id']):
+                logger.warning('An Advertisement may be playing, Sleeping for 3 seconds', extra=self.extras)
+
+            sleep(5)
+
+            self.accept_cookies()
+            invite_element = self.driver.find_element_by_id(bot['invite_id'])
+
+            self.game_link = invite_element.get_attribute('value')
+            self.game_link_lock.release()
+            logger.warning('Releasing game_link_lock for _start_game', extra=self.extras)
+
+            logger.warning("Private room has URL: %s", self.game_link, extra=self.extras)
+
+            self.accept_cookies()
+            rounds_selector = Select(self.driver.find_element_by_id(bot['lobby_rounds_id']))
+            rounds_selector.select_by_visible_text(self.rounds)
+            logger.warning('Rounds set to %s successfully', self.rounds, extra=self.extras)
+
+            self.accept_cookies()
+            draw_time_selector = Select(self.driver.find_element_by_id(bot['lobby_draw_time_id']))
+            draw_time_selector.select_by_visible_text(self.draw_time)
+            logger.warning('Draw Time set to %s successfully', self.draw_time, extra=self.extras)
+
+            self.accept_cookies()
+            custom_words_cs = ','.join(self.custom_words_list)
+            custom_words_text_box = self.driver.find_element_by_id(bot['lobby_custom_words_id'])
+            custom_words_text_box.send_keys(custom_words_cs)
+            logger.warning('Custom words filled inside the text box', extra=self.extras)
+
+            self.accept_cookies()
+            custom_words_only = self.driver.find_element_by_id(bot['lobby_custom_words_chk_box_id'])
+            custom_words_only.click()
+            logger.warning('Room set to use custom words only', extra=self.extras)
+
+            players_in_room = 0
+            while(True):
+                lobby_players_container = self.driver.find_element_by_id(bot['lobby_players_container_id'])
+                lobby_players = lobby_players_container.find_elements_by_class_name(bot['lobby_player_class'])
+                players_in_room = len(lobby_players) - 1
+                logger.warning('%d Players are in room with bot: %s', players_in_room, self.name, extra=self.extras)
+                if players_in_room >= self.required_players:
+                    logger.warning('Required playes have entered the room', extra=self.extras)
+                    break
+                sleep(5)
+
+            self.accept_cookies()
+            start_game_button = self.driver.find_element_by_id(bot['lobby_start_game_id'])
+            start_game_button.click()
+            logger.warning('Starting the game with %d players', players_in_room, extra=self.extras)
+
+            sleep(2)
+
+            self.driver.close()
+            logger.warning('Bot removed from the private room', extra=self.extras)
+            logger.warning('Game has started', extra=self.extras)
+
+        except ElementClickInterceptedException:
+            logger.warning('Accept Cookies occured abruptly or something else. Restarting the process', extra=self.extras)
+            try:
+                self.game_link_lock.release()
+            except Exception:
+                logger.warning('Cannot release lock. Maybe never acquired')
+            self.driver.close()
+            self._start_game()
+
+
+if __name__ == '__main__':
+    skribbl_bot = SkribblBot(6, 90, 1, ['a','b','c','d','e'])
+    skribbl_bot.start_game()
+    game_link = skribbl_bot.get_game_link()
+    print(game_link)
