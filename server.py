@@ -1,11 +1,11 @@
 from flask import Flask, render_template, url_for, redirect, request
-from config import server_config
 from skribbl import SkribblBot
 from functools import wraps
 import urllib
 import pymongo
 import logging
 import uuid
+import os
 
 
 logger_format = '%(asctime)-15s: %(message)s'
@@ -14,7 +14,14 @@ logger = logging.getLogger('Server Logger')
 
 app = Flask(__name__)
 
-config = server_config
+try:
+    from config import server_config
+    config = server_config
+except Exception:
+    config = {
+        'url': os.environ.get('MLAB_URL', '')
+    }
+
 client = pymongo.MongoClient(config['url'])
 db = client.test
 
