@@ -1,0 +1,20 @@
+<html>
+    <head>
+        <title>Auto-Skribbl | Completely anonymous custom words bot for Skribbl.io </title>
+    </head>
+    <body>
+        <section id="heading">
+            <h1>Auto-Skribbl</h1>
+            <p><strong>Auto-Skribbl</strong> is a platform that allows people to play custom words game on <a href="https://skribbl.io" target="_blank">Skribbl.io</a> with complete anonymity from other's words.</p>
+        </section>
+        <section id="main">
+            <h2>Add your words</h2>
+            <p>Please add words comma seperated else they will be discarded or create problem.</p>
+            <form action="/r/words/{{room_id}}" method="post">
+                <label>Enter the words</label> <br>
+                <textarea type="text" name="words" rows="10" cols="100"></textarea> <br>
+                <button type="submit">Add Words</button>
+            </form>
+        </section>
+    </body>
+</html>

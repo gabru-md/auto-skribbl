@@ -1,0 +1,24 @@
+<html>
+    <head>
+        <title>Auto-Skribbl | Completely anonymous custom words bot for Skribbl.io </title>
+    </head>
+    <body>
+        <section id="heading">
+            <h1>Auto-Skribbl</h1>
+            <p><strong>Auto-Skribbl</strong> is a platform that allows people to play custom words game on <a href="https://skribbl.io" target="_blank">Skribbl.io</a> with complete anonymity from other's words.</p>
+        </section>
+        <section id="main">
+            <h2>Create a room to collet words!</h2>
+            <p>Fill in the minimum number of players you will have in the game.</p>
+            <form action="/r/create" method="post">
+                <label>Minimum number of players</label>
+                <input type="text" name="players" /> <br>
+                <label>Number of rounds (2-10)</label>
+                <input type="text" name="rounds" /> <br>
+                <label>Draw time in seconds (30, 40, 50, ... 180)</label>
+                <input type="text" name="draw_time" />
+                <button type="submit">Create Room</button>
+            </form>
+        </section>
+    </body>
+</html>
