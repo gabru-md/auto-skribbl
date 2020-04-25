@@ -22,6 +22,8 @@ except Exception:
         'url': os.environ.get('MLAB_URL', '')
     }
 
+print(config)
+
 client = pymongo.MongoClient(config['url'])
 db = client.test
 
