@@ -144,9 +144,9 @@ def start_game_for_room(room_id):
 
     skribbl_bot = SkribblBot(rounds, draw_time, players, words)
     skribbl_bot.start_game()
-    game_link = skribbl_bot.get_game_link()
+    # game_link = skribbl_bot.get_game_link()
 
-    return render_template('join_room.html', game_link=game_link)
+    return render_template('join_room.html', game_link="gamelink")
     
 
 if __name__ == '__main__':

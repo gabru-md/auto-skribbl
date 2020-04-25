@@ -11,12 +11,16 @@ import threading
 
 logger = logging.getLogger('Skribbl Bot Logger')
 
-# options = Options()
-# options.headless = False
-# options = Options()
-# options.binary_location = GOOGLE_CHROME_BIN
-# options.add_argument('--disable-gpu')
-# options.add_argument('--no-sandbox')
+GOOGLE_CHROME_PATH = '/app/.apt/usr/bin/google_chrome'
+CHROMEDRIVER_PATH = '/app/.chromedriver/bin/chromedriver'
+
+options = Options()
+options.headless = False
+options = Options()
+options.binary_location = GOOGLE_CHROME_PATH
+options.add_argument('--disable-gpu')
+options.add_argument('--no-sandbox')
+
 
 skribbl_url = 'https://skribbl.io'
 
@@ -85,6 +89,8 @@ class SkribblBot:
     def start_game(self):
         start_game_thread = threading.Thread(target=self._start_game)
         start_game_thread.start()
+        get_link_thread = threading.Thread(target=self._get_game_link)
+        get_link_thread.start()
 
 
     def _start_game(self):
@@ -92,9 +98,9 @@ class SkribblBot:
             logger.warning('Acquiring game_link_lock for _start_game')
             self.game_link_lock.acquire()
 
-            logger.warning('Opening Firefox browser')
-            self.driver = webdriver.PhantomJS() #webdriver.Firefox(options=options)
-            logger.warning('Firefox browser opened successfully')
+            logger.warning('Opening Chrome Headless browser')
+            self.driver = webdriver.Chrome(execution_path=CHROMEDRIVER_PATH, chrome_options=options)
+            logger.warning('Chrome Headless browser opened successfully')
 
             self.driver.get(skribbl_url)
 
@@ -171,8 +177,9 @@ class SkribblBot:
             logger.warning('Bot removed from the private room')
             logger.warning('Game has started')
 
-        except Exception:
+        except (ElementNotInteractableException, ElementClickInterceptedException, NoSuchElementException) as e:
             logger.warning('Accept Cookies occured abruptly or something else. Restarting the process')
+            logger.warning(e)
             # try:
             #     self.game_link_lock.release()
             # except Exception:
