@@ -11,8 +11,12 @@ import threading
 
 logger = logging.getLogger('Skribbl Bot Logger')
 
-options = Options()
-options.headless = False
+# options = Options()
+# options.headless = False
+# options = Options()
+# options.binary_location = GOOGLE_CHROME_BIN
+# options.add_argument('--disable-gpu')
+# options.add_argument('--no-sandbox')
 
 skribbl_url = 'https://skribbl.io'
 
@@ -89,7 +93,7 @@ class SkribblBot:
             self.game_link_lock.acquire()
 
             logger.warning('Opening Firefox browser')
-            self.driver = webdriver.Firefox(options=options)
+            self.driver = webdriver.PhantomJS() #webdriver.Firefox(options=options)
             logger.warning('Firefox browser opened successfully')
 
             self.driver.get(skribbl_url)
