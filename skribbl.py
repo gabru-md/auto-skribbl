@@ -16,14 +16,14 @@ cap["marionette"] = False
 
 logger = logging.getLogger('Skribbl Bot Logger')
 
+GECKODRIVER_PATH = '/app/vendor/geckodriver/geckodriver'
+FIREFOX_PATH = '/app/vendor/firefox/firefox'
 GOOGLE_CHROME_PATH = '/app/.apt/usr/bin/google-chrome'
 CHROMEDRIVER_PATH = '/app/.chromedriver/bin/chromedriver'
 
 options = Options()
-options.binary_location = GOOGLE_CHROME_PATH
-options.add_argument('--disable-gpu')
-options.add_argument('--no-sandbox')
-options.add_argument('--headless')
+options.binary_location = FIREFOX_PATH
+options.headless = True
 
 
 skribbl_url = 'https://skribbl.io'
@@ -103,7 +103,7 @@ class SkribblBot:
             self.game_link_lock.acquire()
 
             logger.warning('Opening Chrome Headless browser')
-            self.driver = webdriver.Firefox(executable_path='/app/vendor/geckodriver/geckodriver', capabilities=cap) # webdriver.PhantomJS() # webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, chrome_options=options)
+            self.driver = webdriver.Firefox(executable_path='', capabilities=cap, options=options) # webdriver.PhantomJS() # webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, chrome_options=options)
             logger.warning('Chrome Headless browser opened successfully')
 
             self.driver.get(skribbl_url)
