@@ -98,7 +98,7 @@ class SkribblBot:
             self.game_link_lock.acquire()
 
             logger.warning('Opening Chrome Headless browser')
-            self.driver = webdriver.Firefox() # webdriver.PhantomJS() # webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, chrome_options=options)
+            self.driver = webdriver.Firefox(executable_path='/app/vendor/geckodriver/geckodriver') # webdriver.PhantomJS() # webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, chrome_options=options)
             logger.warning('Chrome Headless browser opened successfully')
 
             self.driver.get(skribbl_url)
