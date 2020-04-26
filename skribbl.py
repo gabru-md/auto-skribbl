@@ -8,6 +8,7 @@ from time import sleep
 import logging
 import random
 import threading
+import os
 
 logger = logging.getLogger('Skribbl Bot Logger')
 
