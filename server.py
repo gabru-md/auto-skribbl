@@ -1,22 +1,18 @@
 from flask import Flask, render_template, url_for, redirect, request
-from config import server_config
 from skribbl import SkribblBot
 from functools import wraps
 import urllib
 import pymongo
 import logging
 import uuid
-
+import os
+from db import db
 
 logger_format = '%(asctime)-15s: %(message)s'
 logging.basicConfig(format=logger_format)
 logger = logging.getLogger('Server Logger')
 
 app = Flask(__name__)
-
-config = server_config
-client = pymongo.MongoClient(config['url'])
-db = client.test
 
 def new_room_id():
     return str(uuid.uuid4())
@@ -90,6 +86,7 @@ def create_room_with_players(players, rounds, draw_time):
         'players': int(players),
         'rounds': int(rounds),
         'draw_time': int(draw_time),
+        'game_link': '',
         'words': []
     })
     return redirect(url_for('room_page', room_id=room_id))
@@ -135,12 +132,22 @@ def start_game_for_room(room_id):
     draw_time = room_details['draw_time']
     words = room_details['words']
 
-    skribbl_bot = SkribblBot(rounds, draw_time, players, words)
+    skribbl_bot = SkribblBot(rounds, draw_time, players, words, room_id)
     skribbl_bot.start_game()
-    game_link = skribbl_bot.get_game_link()
+    # game_link = skribbl_bot.get_game_link()
 
-    return render_template('join_room.html', game_link=game_link)
-    
+    return render_template('join_room.html', room_id=room_id)
+
+
+@app.route('/s/<room_id>', methods=['GET'])
+@room_exists
+def show_game_link(room_id):
+    rooms = db.rooms
+    my_room = rooms.find_one({'room_id': room_id})
+    my_game_link = my_room['game_link']
+    if my_game_link == "":
+        return render_template('game_link.html', ready=False)
+    return render_template('game_link.html', game_link=my_game_link, ready=True)
 
 if __name__ == '__main__':
     app.run(debug=True)
