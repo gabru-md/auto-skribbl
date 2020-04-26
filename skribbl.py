@@ -9,6 +9,7 @@ import logging
 import random
 import threading
 import os
+from db import db
 
 logger = logging.getLogger('Skribbl Bot Logger')
 
@@ -48,7 +49,7 @@ def get_bot_name():
 
 class SkribblBot:
 
-    def __init__(self, rounds, draw_time, required_players, custom_words_list):
+    def __init__(self, rounds, draw_time, required_players, custom_words_list, room_id):
         self.name = get_bot_name()
         self.driver = None
         self.rounds = str(rounds)
@@ -59,6 +60,7 @@ class SkribblBot:
         self.game_link = None
         self.game_link_lock = threading.Lock()
         self.get_game_link = self._get_game_link
+        self.room_id = room_id
 
     def accept_cookies(self):
         if self.cookies_accepted:
@@ -88,6 +90,13 @@ class SkribblBot:
         self.game_link_lock.release()
         logger.warning('Releasing game_link_lock for _get_game_link')
 
+        rooms = db.rooms
+        rooms.update({'room_id': self.room_id}, {
+            '$set': {
+                'game_link': self.game_link
+            }
+        }, upsert=True)
+        logger.warning('Game link updated in database. Room is ready to join.')
         return game_link
 
     def start_game(self):
@@ -198,7 +207,7 @@ class SkribblBot:
 
 
 if __name__ == '__main__':
-    skribbl_bot = SkribblBot(6, 90, 1, ['a','b','c','d','e'])
+    skribbl_bot = SkribblBot(6, 90, 1, ['a','b','c','d','e'], 'room_id_test')
     skribbl_bot.start_game()
     game_link = skribbl_bot.get_game_link()
     print(game_link)
