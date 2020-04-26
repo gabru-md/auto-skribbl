@@ -96,6 +96,8 @@ class SkribblBot:
         get_link_thread = threading.Thread(target=self._get_game_link)
         get_link_thread.start()
 
+    def click(self, element):
+        self.driver.execute_script('arguments[0].click()', element)
 
     def _start_game(self):
         try:
@@ -118,13 +120,12 @@ class SkribblBot:
 
             self.accept_cookies()
             bot_avatar_randomize = self.driver.find_element_by_id(bot['custom_avatar_random_id'])
-            self.driver.execute_script("arguments[0].click()", bot_avatar_randomize)
-            #bot_avatar_randomize.click()
+            self.click(bot_avatar_randomize)
             logger.warning('Randomized bot avatar successfully')
 
             self.accept_cookies()
             bot_private_room = self.driver.find_element_by_id(bot['create_private_room_id'])
-            self.driver.execute_script("arguments[0].click();", bot_private_room)
+            self.click(bot_private_room)
             logger.warning('Private room created successfully')
 
             if not self.check_id_exists(bot['invite_id']):
@@ -155,13 +156,13 @@ class SkribblBot:
 
             self.accept_cookies()
             custom_words_only = self.driver.find_element_by_id(bot['lobby_custom_words_chk_box_id'])
-            custom_words_only.click()
+            self.click(custom_words_only)
             logger.warning('Room set to use custom words only')
 
             self.game_link = invite_element.get_attribute('value')
             self.game_link_lock.release()
             logger.warning('Releasing game_link_lock for _start_game')
-
+            logger.warning('Game with %s bot available at %s', self.name, self.game_link)
 
             players_in_room = 0
             while(True):
@@ -176,7 +177,7 @@ class SkribblBot:
 
             self.accept_cookies()
             start_game_button = self.driver.find_element_by_id(bot['lobby_start_game_id'])
-            start_game_button.click()
+            self.click(start_game_button)
             logger.warning('Starting the game with %d players', players_in_room)
 
             sleep(2)
