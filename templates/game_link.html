@@ -8,8 +8,12 @@
             <p><strong>Auto-Skribbl</strong> is a platform that allows people to play custom words game on <a href="https://skribbl.io" target="_blank">Skribbl.io</a> with complete anonymity from other's words.</p>
         </section>
         <section id="main">
+            {% if ready %}
             <h2>Join the room here</h2>
             <label>Link (Copy and Share):   </label><button><a href="{{game_link}}" target="_blank">{{game_link}}</a></button>
+            {% else %}
+            <h2>The room will be available in some time. Please reload in 30 seconds!</h2>
+            {% endif %}
         </section>
     </body>
 </html>

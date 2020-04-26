@@ -145,8 +145,9 @@ def show_game_link(room_id):
     rooms = db.rooms
     my_room = rooms.find_one({'room_id': room_id})
     my_game_link = my_room['game_link']
-
-    return render_template('game_link.html', game_link=game_link)
+    if my_game_link == "":
+        return render_template('game_link.html', ready=False)
+    return render_template('game_link.html', game_link=my_game_link, ready=True)
 
 if __name__ == '__main__':
     app.run(debug=True)
