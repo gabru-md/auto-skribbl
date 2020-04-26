@@ -118,13 +118,13 @@ class SkribblBot:
 
             self.accept_cookies()
             bot_avatar_randomize = self.driver.find_element_by_id(bot['custom_avatar_random_id'])
-            self.driver.execute_script("argument[0].click()", bot_avatar_randomize)
+            self.driver.execute_script("arguments[0].click()", bot_avatar_randomize)
             #bot_avatar_randomize.click()
             logger.warning('Randomized bot avatar successfully')
 
             self.accept_cookies()
             bot_private_room = self.driver.find_element_by_id(bot['create_private_room_id'])
-            self.driver.execute_script("argument[0].click();", bot_private_room)
+            self.driver.execute_script("arguments[0].click();", bot_private_room)
             logger.warning('Private room created successfully')
 
             if not self.check_id_exists(bot['invite_id']):
