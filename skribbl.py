@@ -67,7 +67,8 @@ class SkribblBot:
             cookies = self.driver.find_elements_by_link_text('Allow cookies')
             for cookie in cookies:
                 logger.warning(cookie)
-            self.driver.execute_script(accept_cookies_remove_script)
+                cookie.click()
+            # self.driver.execute_script(accept_cookies_remove_script)
             logger.warning('Removed Accept Cookies box')
             self.cookies_accepted = True
         except (JavascriptException, WebDriverException) as e:
@@ -109,6 +110,8 @@ class SkribblBot:
 
             self.accept_cookies()
             logger.warning('Website %s opened successfully', skribbl_url)
+
+            sleep(3)
 
             bot_name_field = self.driver.find_element_by_id(bot['name_field_id'])
             bot_name_field.send_keys(self.name)
