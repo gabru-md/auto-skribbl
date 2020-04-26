@@ -64,6 +64,8 @@ class SkribblBot:
         if self.cookies_accepted:
             return
         try:
+            cookies = self.driver.find_elements_by_link_text('Allow cookies')
+            logger.warning(len(cookies))
             self.driver.execute_script(accept_cookies_remove_script)
             logger.warning('Removed Accept Cookies box')
             self.cookies_accepted = True
