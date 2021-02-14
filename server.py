@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, redirect, request
+from flask import Flask, render_template, url_for, redirect, request, flash
 from skribbl import SkribblBot
 from functools import wraps
 import urllib
@@ -6,6 +6,7 @@ import pymongo
 import logging
 import uuid
 import os
+import time
 from db import db
 
 logger_format = '%(asctime)-15s: %(message)s'
@@ -13,6 +14,9 @@ logging.basicConfig(format=logger_format)
 logger = logging.getLogger('Server Logger')
 
 app = Flask(__name__)
+
+# used for flash has no other purpose
+app.secret_key = "u4rm{^!e7=o?&_'*Ff*7"
 
 def new_room_id():
     return str(uuid.uuid4())
@@ -50,11 +54,34 @@ def room_exists(func):
 def homepage():
     logger.warning('lol')
     increment_usage()
-    return render_template('index.html')
+    appreciation_count = db.appreciations.find().count()
+    games_created = db.rooms.find().count()
+    page_visits = db.usage.find_one({'author': 'admin'})['usage']
+
+    recent_appreciations = db.appreciations.find().sort("created_time", pymongo.DESCENDING).limit(1)
+    recent_appreciation = None
+    for r_a in recent_appreciations:
+        recent_appreciation = r_a
+
+    review = ""
+    name = ""
+    if recent_appreciation != None:
+        review = recent_appreciation["review"]
+        name = recent_appreciation["name"]
+    page_data = {
+    "appreciation_count": appreciation_count,
+    "games_created": games_created,
+    "page_visits": page_visits,
+    "appreciation_review": review,
+    "appreciation_user": name
+    }
+
+
+    return render_template('main_page.html', home_selected=True, page_data=page_data)
 
 @app.route('/r', methods=['GET'])
 def create_room():
-    return render_template('create_room.html')
+    return render_template('new_create_room.html', home_selected=True)
 
 @app.route('/r/create', methods=['POST'])
 def init_room():
@@ -62,7 +89,7 @@ def init_room():
     if 'players' in data and 'rounds' in data and 'draw_time' in data:
         try:
             players = int(data.get('players'))
-            rounds = int(data.get('players'))
+            rounds = int(data.get('rounds'))
             draw_time = int(data.get('draw_time'))
             if players < 1:
                 players = 2
@@ -87,6 +114,7 @@ def create_room_with_players(players, rounds, draw_time):
         'rounds': int(rounds),
         'draw_time': int(draw_time),
         'game_link': '',
+        'created_time': int(round(time.time())),
         'words': []
     })
     return redirect(url_for('room_page', room_id=room_id))
@@ -109,19 +137,21 @@ def add_words_to_room(room_id):
             }
         }, upsert=True)
     except Exception:
+        flash("Some error while adding words!")
         return redirect(url_for('homepage'))
 
+    flash("Words added successfuly!")
     return redirect(url_for('room_page', room_id=room_id))
 
 @app.route('/r/<room_id>', methods=['GET'])
 @room_exists
 def room_page(room_id):
-    return render_template('room.html', room_id=room_id)
+    return render_template('new_room.html', room_id=room_id, home_selected=True)
 
 @app.route('/r/a/<room_id>', methods=['GET'])
 @room_exists
 def room_with_id(room_id):
-    return render_template('add_words.html', room_id=room_id)
+    return render_template('new_add_words.html', room_id=room_id, home_selected=True)
 
 @app.route('/r/start/<room_id>', methods=['GET'])
 @room_exists
@@ -136,7 +166,7 @@ def start_game_for_room(room_id):
     skribbl_bot.start_game()
     # game_link = skribbl_bot.get_game_link()
 
-    return render_template('join_room.html', room_id=room_id)
+    return render_template('new_join_room.html', room_id=room_id)
 
 
 @app.route('/s/<room_id>', methods=['GET'])
@@ -146,8 +176,36 @@ def show_game_link(room_id):
     my_room = rooms.find_one({'room_id': room_id})
     my_game_link = my_room['game_link']
     if my_game_link == "":
-        return render_template('game_link.html', ready=False)
-    return render_template('game_link.html', game_link=my_game_link, ready=True)
+        return render_template('new_game_link.html', ready=False, home_selected=True, room_id=room_id)
+    return render_template('new_game_link.html', game_link=my_game_link, ready=True, home_selected=True)
+
+
+@app.route("/appreciate", methods=['GET'])
+def show_appreciation():
+    return render_template('new_appreciation.html', appreciate_selected=True)
+
+@app.route("/new/appreciation", methods=['POST'])
+def register_new_appreciation():
+    data = request.form
+    if 'name' not in data:
+        flash("Name is not present!")
+        return redirect(url_for("show_appreciation"))
+    if 'review' not in data:
+        flash("No review mentioned!")
+        return redirect(url_for("show_appreciation"))
+
+    name = data['name']
+    review = data['review']
+
+    appreciations = db.appreciations
+    appreciations.insert_one({
+    "name": name,
+    "review": review,
+    "created_time": int(round(time.time()))
+    })
+
+    flash("Thank you for the review :)")
+    return render_template('new_appreciation.html', appreciate_selected=True)
 
 if __name__ == '__main__':
     app.run(debug=True)

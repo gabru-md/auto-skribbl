@@ -1,0 +1,33 @@
+{% extends 'new_base.html' %}
+{% block content %}
+<div class="row">
+	<div class="col-md-2">
+	</div>
+	<div class="col-md-8">
+		<div class="card mb-4 my-4">
+			<img class="card-img-top" src="{{ url_for('static', filename='img/skribbl.jpg') }}" alt="Skribbl Image" height="400px" width="500px">
+			<div class="card-body">
+				<div>
+					{% if ready %}
+					<h2>Game Ready!</h2>
+					<div class="form-group">
+						<normal>Your game is up and live. Click the button to join it :)</normal>
+					</div>
+					<div class="form-group">
+						<button type="submit" class="btn btn-success"><a href="{{game_link}}" target="_blank" style="color: inherit;text-decoration: inherit;">Join Game! &rarr;</a></button>
+					</div>
+					{% else %}
+					<h2>Under Progress!</h2>
+					<div class="form-group">
+						<normal>Your game is being created. Please check again in a few moments!</normal>
+					</div>
+					<div class="form-group">
+						<button type="submit" class="btn btn-info"><a href="/s/{{room_id}}" style="color: inherit;text-decoration: inherit;">Reload <span class=reload>&#x21bb;</span></a></button>
+					</div>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

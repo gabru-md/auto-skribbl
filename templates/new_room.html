@@ -1,0 +1,37 @@
+{% extends 'new_base.html' %}
+{% block content %}
+<div class="row">
+	<div class="col-md-2">
+	</div>
+	<div class="col-md-8">
+		<div class="card mb-4 my-4">
+			<img class="card-img-top" src="{{ url_for('static', filename='img/skribbl.jpg') }}" alt="Skribbl Image" height="400px" width="500px">
+			<div class="card-body">
+				<h2>Room Created!</h2>
+				<form style="padding-top: 10px;">
+					<div class="form-group">
+						<label>Room Id: {{room_id}}</label> <br/>
+						<label>Ask your friends to add words by sharing this <a href="/r/a/{{room_id}}">link</a> with them.</label>
+					</div>
+				</form>
+				<div class="row" style="padding-top:20px">
+					<div class="col-md-4 offset-md-2">
+						<form action="/r/a/{{room_id}}" method="GET">
+							<div class="form-group">
+								<button type="submit" class="btn btn-primary">Add Words &rarr;</button>
+							</div>
+						</form>
+					</div>
+					<div class="col-md-4">
+						<form action="/r/start/{{room_id}}" method="GET">
+							<div class="form-group">
+								<button type="submit" class="btn btn-success">Start Game &rarr;</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

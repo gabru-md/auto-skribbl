@@ -1,0 +1,70 @@
+{% extends 'new_base.html' %}
+{% block content %}
+<div class="row">
+
+	<!-- Blog Entries Column -->
+	<div class="col-md-8">
+		<!-- Blog Post -->
+		<div class="card mb-4 my-4">
+			<img class="card-img-top" src="{{ url_for('static', filename='img/skribbl.jpg') }}" alt="Skribbl Image">
+			<div class="card-body">
+				<h2 class="card-title">Auto-Skribbl</h2>
+				<p class="card-text"><strong>Auto-Skribbl</strong> is a platform that allows people to play custom words game on <a href="https://skribbl.io" target="_blank">skribbl.io</a> with complete anonymity from other's words.</p>
+				<a href="/r" class="btn btn-info">Create Room &rarr;</a>
+			</div>
+		</div>
+
+	</div>
+
+	<!-- Sidebar Widgets Column -->
+	<div class="col-md-4">
+
+		<!-- Categories Widget -->
+		<div class="card my-4">
+			<h5 class="card-header">Stats</h5>
+			<div class="card-body">
+				<div class="row">
+					<div class="col-lg-12">
+						<ul class="list-unstyled mb-0" style="font-weight: bold">
+							<li>
+								<normal>{{page_data.page_visits}} Page Visits</normal>
+							</li>
+							<li>
+								<normal>{{page_data.games_created}} Games Created</normal>
+							</li>
+							<li>
+								<normal>{{page_data.appreciation_count}} Appreciations</normal>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Side Widget -->
+		<div class="card my-4">
+			<h5 class="card-header">Facing Problems?</h5>
+			<div class="card-body">
+				If you are facing any problems using this platform of you find a bug or an issue with it then please leave an <a href="mailto:manish.nsit8@example.com?subject=Auto-Skribbl.io | Issue | Bug">email.</a>
+			</div>
+		</div>
+
+
+		<!-- Recent Appreciation -->
+		<div class="card my-4">
+			<h5 class="card-header">Recent Appreciation</h5>
+			<div class="card-body">
+				<normal>{{page_data.appreciation_review}}</normal>
+				<br/>
+				<small>- {{page_data.appreciation_user}}</small>
+			</div>
+			<div class="card-body">
+				<button type="submit" class="btn btn-light"><a href="/appreciate" style="color: inherit;text-decoration: inherit;">Add one &rarr;</a></button>
+			</div>
+		</div>
+
+	</div>
+
+</div>
+<!-- /.row -->
+{% endblock %}

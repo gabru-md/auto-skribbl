@@ -1,0 +1,29 @@
+{% extends 'new_base.html' %}
+{% block content %}
+<div class="row">
+	<div class="col-md-2">
+	</div>
+	<div class="col-md-8">
+		<div class="card mb-4 my-4">
+			<img class="card-img-top" src="{{ url_for('static', filename='img/skribbl.jpg') }}" alt="Skribbl Image" height="400px" width="500px">
+			<div class="card-body">
+				<h2>Add your words</h2>
+				<form action="/r/words/{{room_id}}" method="post">
+					<div class="form-group">
+						<label>Enter the words</label> <br>
+						<textarea type="text" name="words" rows="5" style="width: 100%"></textarea>
+					</div>
+					<div class="form-group">
+						<small>
+							<strong>Note:</strong> Please add words comma seperated else they will be discarded or create problem.
+							<br/>
+							<strong>eg:</strong> television, laptop, mouse, keyboard
+						</small>
+					</div>
+					<button type="submit" class="btn btn-success">Add Words</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

@@ -9,19 +9,22 @@ import logging
 import random
 import threading
 import os
+import time
 from db import db
+from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.utils import ChromeType
+
 
 logger = logging.getLogger('Skribbl Bot Logger')
 
-CHROMEDRIVER_PATH = os.environ.get("CHROMEDRIVER_PATH")
-GOOGLE_CHROME_BINARY = os.environ.get("GOOGLE_CHROME_BINARY")
 
 chrome_options = webdriver.ChromeOptions()
-chrome_options.binary_location = GOOGLE_CHROME_BINARY
 chrome_options.add_argument("--headless")
 chrome_options.add_argument("--disable-dev-shm-usage")
 chrome_options.add_argument("--no-sandbox")
 
+# 5 minutes
+MAX_WAIT_DURATION = 300000
 
 skribbl_url = 'https://skribbl.io'
 
@@ -114,7 +117,7 @@ class SkribblBot:
             self.game_link_lock.acquire()
 
             logger.warning('Opening Chrome Headless browser')
-            self.driver = webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, chrome_options=chrome_options)
+            self.driver = webdriver.Chrome(ChromeDriverManager(chrome_type=ChromeType.CHROMIUM).install(), chrome_options=chrome_options)
             logger.warning('Chrome Headless browser opened successfully')
 
             self.driver.get(skribbl_url)
@@ -174,7 +177,13 @@ class SkribblBot:
             logger.warning('Game with %s bot available at %s', self.name, self.game_link)
 
             players_in_room = 0
+            start_time = round(time.time())
+            curr_time = start_time
             while(True):
+                curr_time = round(time.time())
+                if curr_time - start_time > MAX_WAIT_DURATION and players_in_room == 0:
+                    logger.warning('Bot waited for ' + MAX_WAIT_DURATION + '. Game ended since nobody showed up')
+                    break
                 lobby_players_container = self.driver.find_element_by_id(bot['lobby_players_container_id'])
                 lobby_players = lobby_players_container.find_elements_by_class_name(bot['lobby_player_class'])
                 players_in_room = len(lobby_players) - 1
